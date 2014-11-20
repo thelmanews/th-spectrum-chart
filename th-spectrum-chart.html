@@ -44,15 +44,20 @@
 	<script>
 		Polymer('th-spectrum-chart', {
 		  chartData: [
-		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:''},
-		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: ''},
-		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100', color:''}],
+		  		{label: 'Medicaid', range_min_value: 10, range_min_display_value: '$10', range_max_value: 50, range_max_display_value: '$50', color:'', offset: -20},
+		        {label: 'Federal',  pattern: 'stripe',  range_min_value: 40, range_min_display_value: '$40', range_max_value: 60, range_max_display_value: '$60', color: '', offset: -10},
+		        {label: 'Medicare', range_min_value: 70, range_min_display_value: '$70', range_max_value: 100, range_max_display_value: '$100', color:'', offset: 0}],
 		  orientation: 'vertical',
 		  //animationDelay: 500,
 		  init: function() {
 		    var self = this;
           
         self._setAllDims();
+
+        // Set offset to 0 if not specified
+        self.chartData.forEach(function(d) {
+	          d.offset = d.offset || 0; 
+	      });
 
         // setup chart area
 	      self.svg = d3.select(this.$.chart);
@@ -89,7 +94,7 @@
 		      self.labels = this.container.selectAll('.label').data(this.chartData).enter()
     				.append('g')
     					.attr('transform',function(d) {
-						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')';
+						     return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ) - d.offset)+')';
 						   }) 
     				.append('foreignObject')
     				.append('xhtml:div').style('opacity', 1);
@@ -103,7 +108,7 @@
 		      	.append('g')
 		      		.attr('transform',function(d) {
 						     var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
-						     yPos = self.dims.height - self.y(d.range_max_value );
+						     yPos = self.dims.height - self.y(d.range_max_value ) - d.offset;
 						     return 'translate('+xPos+','+yPos+')';
 						   }) 
     				.append('foreignObject')
@@ -259,7 +264,7 @@
 	        self.labels.select(function() {return this.parentNode.parentNode; })
 	        	.transition().duration(delay)
 		        .attr('transform',function(d) {
-		        	return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ))+')'; 
+		        	return 'translate(0,'+(self.dims.height - self.y(d.range_max_value ) - d.offset)+')'; 
 		        });
 		      
 		      // Transition for opacity causes the values to jump. Why is opacity affecting position?!
@@ -269,7 +274,7 @@
 	        	.transition().duration(self.animationDelay)
 		        .attr('transform',function(d) {
 		        	var xPos = self.dims.labels.containerWidth + self.dims.margin.label*2 + self.dims.bar.width,
-		        			yPos = self.dims.height - self.y(d.range_max_value );
+		        			yPos = self.dims.height - self.y(d.range_max_value ) - d.offset;
 		        	return 'translate('+xPos+','+yPos+')'; 
 		        });
 
@@ -279,7 +284,12 @@
 
 		  	  var self = this;
 
-		      self._setAllDims();  	  
+		      self._setAllDims();  	 
+
+		      // Set offset to 0 if not specified
+        	self.chartData.forEach(function(d) {
+	          d.offset = d.offset || 0; 
+	      	}); 
 
 				  self.bars = self.container.selectAll('.bar').data(self.chartData);
 				  self.labelGroups = self.container.selectAll('.labelg').data(self.chartData);
