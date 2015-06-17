@@ -142,7 +142,7 @@
 
 	        self.dims = self.setupStackedDims(self);
 
-		      var dataMargin = 0.1;  // 10% extra space     
+		      var dataMargin = 0.05;  // 10% extra space     
 
 		      var minmin = d3.min(self.chartData, function(d) { return d.range_min_value;});
 
@@ -252,7 +252,8 @@
 
 	        self.bars.transition().duration(delay)
 	        	.attr('x', self.dims.width/2 - self.dims.bar.width/2)
-		        .attr('y', function(d) {return self.dims.height - self.y(d.range_max_value)})
+	        	// * 1.025 is needed to take into account the 0.05 spectrum empty margin on the bottom (and top) 
+		        .attr('y', function(d) {return self.y(self._wholeRange.max) * 1.025 - self.y(d.range_max_value); }) 
 		        .attr('width',self.dims.bar.width)
 	        	.attr('height', function(d) {
 	        		//to avoid negative heights
